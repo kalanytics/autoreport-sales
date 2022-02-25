@@ -1,0 +1,12 @@
+---
+title: "Auto-report SHINY APP Demo - SALES"
+date: "24 February 2022 (last updated: `r format(Sys.Date(), '%d %B %Y')`)"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+```
+
