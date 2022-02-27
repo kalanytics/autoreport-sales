@@ -2,6 +2,14 @@
 
 Automate your repetitive reports! 
 
+## Screenshots
+
+!["Screenshot: Overview"](screenshot/screenshot1.jpg)
+
+![](screenshot/screenshot2.jpg)
+
+![](screenshot/screenshot3.jpg)
+
 ## Features
 
 - Complete template customization.
