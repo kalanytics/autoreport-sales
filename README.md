@@ -10,6 +10,10 @@ Automate your repetitive reports!
 
 ![](screenshot/screenshot3.jpg)
 
+## Output Example
+
+Click [here](https://kalanytics.github.io/autoreport-sales/).
+
 ## Features
 
 - Complete template customization.
