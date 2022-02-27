@@ -4,17 +4,19 @@ Automate your repetitive reports!
 
 ## Screenshots
 
-!["Screenshot: Overview"](screenshot/screenshot1.jpg)
+!["Screenshot: Overview"](screenshot/screenshot1.jpg | width=100)
 
-![](screenshot/screenshot2.jpg)
+![](screenshot/screenshot2.jpg | width=100)
 
-![](screenshot/screenshot3.jpg)
+![](screenshot/screenshot3.jpg | width=100)
 
 ## Features
 
 - Complete template customization.
+- Multiple templates from one or multiple datasets. 
 - Multiple output formats: html (for interactive reports), pdf, presentation slides or word documents.
-- Interactive reports with plotly!
+- Dataset sources: CSV, Excel, and JSON.
+- Interactive charts with plotly! (See [gallery](https://plotly.com/r/), HTML outputs only.)
 - Maximize reproducability in your reports - reduce human errors especially in processes that require long data manipulation and calculations.
 - Based on open source software.
 
