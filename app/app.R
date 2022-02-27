@@ -2,9 +2,12 @@ library(shiny)
 library(shinyWidgets)
 library(tidyverse)
 
+# DATA ----
 raw <- read_csv(here::here("data/supermarket_sales - Sheet1.csv")) %>% 
+  # format date 
   mutate(Date = lubridate::mdy(Date))
 
+# UI ----
 ui <- fluidPage(
   title = "Auto Report",
   tags$div(class = "container", style = "text-align:center;",
@@ -44,22 +47,33 @@ ui <- fluidPage(
                           style = "width:100%;")
            ),
   
-  tags$div(class = "container", style = "padding: 15px;",
-           p("Dataset Source :", tags$a("kaggle/aungpyaetap", href = "https://www.kaggle.com/aungpyaeap/supermarket-sales")))
+  tags$div(class = "container",
+           style = "padding: 15px;",
+           p(
+             "Dataset Source :",
+             tags$a("kaggle/aungpyaetap",
+                    href = "https://www.kaggle.com/aungpyaeap/supermarket-sales")
+           ))
   
 )
 
+# SERVER ----
 server <- function(input, output, session) {
   
   output$reportHTML <- downloadHandler(
     filename =  "report.html",
     
     content = function(file) {
+      
+      # add loading animation
+      showModal(modalDialog("Loading", footer=NULL))
+      on.exit(removeModal())
+      
       # Copy the report file to a temporary directory before processing it, in
       # case we don't have write permissions to the current working dir (which
       # can happen when deployed).
       tempReport <- file.path(tempdir(), "template1.Rmd")
-      file.copy("template1.Rmd", tempReport, overwrite = TRUE)
+      file.copy(here::here("template/template1.Rmd"), tempReport, overwrite = TRUE) 
       
       # Set up parameters to pass to Rmd document
       params <- list(
@@ -81,15 +95,23 @@ server <- function(input, output, session) {
   output$reportPDF <- downloadHandler(
     filename =  "report.pdf",
     content = function(file) {
-      tempReport <- file.path(tempdir(), "template1.Rmd")
-      file.copy("template1.Rmd", tempReport, overwrite = TRUE)
       
+      # add loading animation
+      showModal(modalDialog("Loading", footer=NULL))
+      on.exit(removeModal())
+      
+      # copy file to temporary directory
+      tempReport <- file.path(tempdir(), "template1.Rmd")
+      file.copy(here::here("template/template1.Rmd"), tempReport, overwrite = TRUE) 
+      
+      # Set up parameters to pass to Rmd document
       params <- list(
         startDate = input$idStart,
         endDate = input$idEnd,
         branch = input$idCity
       )
       
+      # knit to html, then print as pdf using chrome_print()
       html_fn <- rmarkdown::render(tempReport,  params = params,
                                    envir = new.env(parent = globalenv()))
       
@@ -99,4 +121,5 @@ server <- function(input, output, session) {
   
 }
 
+# RUN SHINY APP ----
 shinyApp(ui, server)
