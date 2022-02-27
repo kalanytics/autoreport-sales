@@ -4,11 +4,11 @@ Automate your repetitive reports!
 
 ## Screenshots
 
-!["Screenshot: Overview"](screenshot/screenshot1.jpg | width=100)
+!["Screenshot: Overview"](screenshot/screenshot1.jpg)
 
-![](screenshot/screenshot2.jpg | width=100)
+![](screenshot/screenshot2.jpg)
 
-![](screenshot/screenshot3.jpg | width=100)
+![](screenshot/screenshot3.jpg)
 
 ## Features
 
