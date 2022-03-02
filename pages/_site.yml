@@ -1,0 +1,10 @@
+name: "my-website"
+navbar:
+  title: "My Website"
+  left:
+    - text: "Home"
+      href: index.html
+    - text: "Templates"
+      sublinks:
+        text: "Template 1"
+        href: pages/template1.html

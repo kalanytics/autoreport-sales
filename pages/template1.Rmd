@@ -1,0 +1,224 @@
+---
+params:
+  title: Sales Report
+  startDate: 2019/1/1
+  endDate: 2019/3/31
+  branch: Mandalay
+output:
+  html_document:
+    # template: template1-skeleton.html
+    toc: true
+    toc_depth: 3
+    theme: paper
+title: "`r params$title` : `r params$branch`"
+author: "for `r format(as.Date(params$startDate), '%d %b %Y')` - `r format(as.Date(params$endDate), '%d %b %Y')`"
+date: "Report generated: `r format(Sys.Date(), '%A, %d %B %Y')`"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+
+library(tidyverse)
+library(viridis)
+library(plotly)
+library(kableExtra)
+library(formattable)
+library(calendR)
+library(lubridate)
+```
+
+```{css}
+/* force h2 title to display on new page */
+.break-before {
+  page-break-before: always;
+}
+```
+
+
+```{r data}
+# import dataset
+raw <- read_csv(here::here("data/supermarket_sales - Sheet1.csv"))
+
+# clean dataset
+df <- 
+  raw %>% 
+  
+  # clean date
+  mutate(Date = lubridate::mdy(Date)) %>% 
+  
+  # filter start & end date
+  dplyr::filter(City == params$branch)
+```
+
+## Summary
+
+```{r}
+total_sales = df$Total %>% sum()
+total_cogs = df$cogs %>% sum()
+total_gross = df$`gross income` %>% sum()
+avg_qty = df$Quantity %>% mean()
+avg_rating = df$Rating %>% mean()
+med_rating = df$Rating %>% median()
+
+tibble(
+  indicator = c("Total Sales", "Total COGS", "Total Gross Income", "Average Quantity Bought", "Average Ratings", "Median Ratings"),
+  values = c(total_sales, total_cogs, total_gross, avg_qty, avg_rating, med_rating)
+) %>% 
+  mutate(values = format(round(values, 2), big.mark = ",", scientific = FALSE)) %>% 
+  kable() %>%
+  kable_styling(bootstrap_options = c("hover", "responsive"))
+```
+
+<div class="break-before"></div>
+
+## Total Revenue per Product Line
+
+```{r pie-chart-1}
+# data for pie chart
+data_pie <-
+  df %>%
+  rename("group" = "Product line") %>% 
+  group_by(group) %>% 
+  summarise(n = sum(Total)) %>% 
+  arrange(-n)
+
+# pie chart by product line
+plot_ly(
+  data_pie,
+  labels = ~ group,
+  values = ~ n,
+  type = "pie",
+  marker = list(colors = viridis_pal(option = "D")(6),
+              line = list(color = '#FFFFFF', width = 1))
+) %>% 
+  
+  # layout
+  layout(
+    title = "",
+    xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+    yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE)
+  )
+```
+
+```{r}
+data_pie %>% 
+  mutate(
+    n = currency(n, digits = 2L)
+  ) %>% 
+  rename(
+    "Product Line" = "group",
+    "Sum Total" = "n"
+  ) %>% 
+  kable() %>% 
+  kable_styling(bootstrap_options = c("hover", "responsive"))
+```
+
+<div class="break-before"></div>
+
+## Gross Income per Product Line
+
+```{r pie-chart-2}
+# data for pie chart
+data_pie2 <-
+  df %>%
+  rename("group" = "Product line",
+         "value" = "gross income") %>% 
+  group_by(group) %>% 
+  summarise(n = sum(value)) %>% 
+  arrange(-n)
+
+# pie chart by product line
+plot_ly(
+  data_pie,
+  labels = ~ group,
+  values = ~ n,
+  type = "pie",
+  marker = list(colors = viridis_pal(option = "D")(6),
+              line = list(color = '#FFFFFF', width = 1))
+) %>% 
+  
+  # layout
+  layout(
+    title = "",
+    xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+    yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE)
+  )
+```
+
+```{r}
+data_pie2 %>% 
+  mutate(
+    n = currency(n, digits = 2L)
+  ) %>% 
+  rename(
+    "Product Line" = "group",
+    "Sum Total of Gross Income" = "n"
+  ) %>% 
+  kable() %>% 
+  kable_styling(bootstrap_options = c("hover", "responsive"))
+```
+
+<div class="break-before"></div>
+
+## Customer Flow
+
+### By days of week
+
+```{r}
+day_lvl <- c("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+
+data_day <- 
+  df %>% 
+  mutate(day = format(Date, "%a"),
+         day = factor(day, levels = day_lvl)) %>% 
+  count(day)
+
+# level
+xform <- list(categoryorder = "array",
+              categoryarray = day_lvl)
+
+data_day %>% 
+  plot_ly(
+    x = ~ day,
+    y = ~ n,
+    type = "bar",
+    marker = list(color = "#21918c")
+  ) %>% 
+  layout(
+    bargap = 0.1,
+    xaxis = xform
+  )
+```
+
+<div class="break-before"></div>
+
+## Heatmap of calendar days
+
+```{r, fig.height=10, fig.width=12}
+dates2022 <- seq(ymd("2019-01-01"), ymd('2019-12-31'), by='days') %>% as.tibble()
+
+df_cal <- 
+  df %>% 
+  count(Date)
+
+data_cal <- 
+  dates2022 %>% 
+  left_join(df_cal, by = c("value" = "Date")) %>% 
+  mutate(n = replace_na(n, 0))
+
+calendR(
+  year = 2022,
+  special.days = data_cal$n,
+  gradient = TRUE,
+  # Needed to create the heat map
+  special.col = rgb(33/255, 145/255, 140/255, alpha = 1),
+  # Higher color
+  low.col = "white"
+) # In this case, the color of the values out of the gradient
+
+```
+
+
+
+
+
